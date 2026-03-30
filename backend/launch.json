@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Spring Boot-SubTrakApplication<subtrak>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.subtrak.SubTrakApplication",
+            "projectName": "subtrak",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        }
+    ]
+}

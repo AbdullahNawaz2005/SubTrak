@@ -1,0 +1,30 @@
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# Build
+target/
+build/
+*.class
+*.jar
+*.war
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment and secrets
+.env
+*.env
+application-local.properties
+application-prod.properties
+
+# Sensitive files that may contain secrets
+**/secrets/
+*.pem
+*.key

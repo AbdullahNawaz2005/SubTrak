@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>SubTrak | Celestial Subscriptions</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "surface-container-low": "#1b1b25",
+                        "on-primary-fixed-variant": "#5a00c6",
+                        "on-primary-fixed": "#25005a",
+                        "inverse-surface": "#e4e1f0",
+                        "on-tertiary-fixed": "#001a42",
+                        "surface-dim": "#12121d",
+                        "inverse-primary": "#732ee4",
+                        "primary-container": "#7c3aed",
+                        "outline": "#958da1",
+                        "tertiary-fixed-dim": "#adc6ff",
+                        "secondary": "#4cd7f6",
+                        "primary": "#d2bbff",
+                        "tertiary": "#adc6ff",
+                        "on-surface-variant": "#ccc3d8",
+                        "primary-fixed-dim": "#d2bbff",
+                        "on-tertiary-fixed-variant": "#004395",
+                        "primary-fixed": "#eaddff",
+                        "on-tertiary-container": "#dce5ff",
+                        "on-secondary-container": "#00424e",
+                        "on-primary-container": "#ede0ff",
+                        "surface-variant": "#34343f",
+                        "surface": "#12121d",
+                        "on-secondary-fixed": "#001f26",
+                        "secondary-fixed-dim": "#4cd7f6",
+                        "surface-container-high": "#292934",
+                        "on-primary": "#3f008e",
+                        "tertiary-container": "#0062d2",
+                        "surface-bright": "#393844",
+                        "secondary-fixed": "#acedff",
+                        "secondary-container": "#03b5d3",
+                        "surface-container-lowest": "#0d0d17",
+                        "surface-tint": "#d2bbff",
+                        "error-container": "#93000a",
+                        "on-tertiary": "#002e6a",
+                        "on-secondary": "#003640",
+                        "inverse-on-surface": "#302f3b",
+                        "surface-container": "#1f1f2a",
+                        "on-surface": "#e4e1f0",
+                        "on-secondary-fixed-variant": "#004e5c",
+                        "background": "#12121d",
+                        "on-background": "#e4e1f0",
+                        "error": "#ffb4ab",
+                        "tertiary-fixed": "#d8e2ff",
+                        "on-error": "#690005",
+                        "on-error-container": "#ffdad6",
+                        "outline-variant": "#4a4455",
+                        "surface-container-highest": "#34343f"
+                    },
+                    fontFamily: {
+                        "headline": ["Space Grotesk"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            background-color: #080812;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(124, 58, 237, 0.05) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(3, 181, 211, 0.05) 0px, transparent 50%);
+            color: #e4e1f0;
+            font-family: 'Inter', sans-serif;
+        }
+        .glass-card {
+            background: rgba(27, 27, 37, 0.7);
+            backdrop-filter: blur(12px);
+            border-top: 1px solid rgba(74, 68, 85, 0.2);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .glass-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px -15px rgba(124, 58, 237, 0.2);
+            border-top: 1px solid rgba(124, 58, 237, 0.4);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .active-glow {
+            box-shadow: 0 0 15px rgba(124, 58, 237, 0.3);
+        }
+        .technical-label {
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-size: 0.625rem;
+            font-weight: 600;
+        }
+
+        /* Nav Item Hover Glow */
+        .nav-item-glow {
+            position: relative;
+        }
+        .nav-item-glow::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: #7c3aed;
+            box-shadow: 0 0 15px #7c3aed;
+            transform: scaleY(0);
+            transform-origin: center;
+            transition: transform 0.3s ease;
+            border-top-right-radius: 4px;
+            border-bottom-right-radius: 4px;
+        }
+        .nav-item-glow:hover::before {
+            transform: scaleY(1);
+        }
+
+        /* Page Load Card Animation */
+        .card-animate {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .card-animate.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Drift animation for orbs */
+        @keyframes drift {
+            0% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(30px, -50px) scale(1.1); }
+            66% { transform: translate(-20px, 20px) scale(0.9); }
+            100% { transform: translate(0, 0) scale(1); }
+        }
+        .animate-drift-1 { animation: drift 15s infinite alternate ease-in-out; }
+        .animate-drift-2 { animation: drift 18s infinite alternate-reverse ease-in-out; }
+        .animate-drift-3 { animation: drift 20s infinite alternate ease-in-out; }
+                    colors: {
+                        "on-secondary-container": "#00424e",
+                        "tertiary": "#adc6ff",
+                        "surface-container-high": "#292934",
+                        "inverse-on-surface": "#302f3b",
+                        "on-primary-container": "#ede0ff",
+                        "secondary-fixed-dim": "#4cd7f6",
+                        "surface-variant": "#34343f",
+                        "surface-tint": "#d2bbff",
+                        "outline": "#958da1",
+                        "background": "#080812",
+                        "on-error-container": "#ffdad6",
+                        "on-error": "#690005",
+                        "surface-container-lowest": "#0d0d17",
+                        "secondary-fixed": "#acedff",
+                        "on-tertiary": "#002e6a",
+                        "surface-dim": "#12121d",
+                        "on-tertiary-fixed": "#001a42",
+                        "on-background": "#e4e1f0",
+                        "surface-container-low": "#1b1b25",
+                        "error": "#ffb4ab",
+                        "primary-container": "#7c3aed",
+                        "error-container": "#93000a",
+                        "on-primary": "#3f008e",
+                        "tertiary-fixed": "#d8e2ff",
+                        "surface-container-highest": "#34343f",
+                        "inverse-surface": "#e4e1f0",
+                        "on-secondary-fixed": "#001f26",
+                        "secondary": "#4cd7f6",
+                        "secondary-container": "#03b5d3",
+                        "primary": "#d2bbff",
+                        "on-secondary-fixed-variant": "#004e5c",
+                        "on-primary-fixed-variant": "#5a00c6",
+                        "outline-variant": "#4a4455",
+                        "on-surface-variant": "#ccc3d8",
+                        "on-tertiary-fixed-variant": "#004395",
+                        "on-tertiary-container": "#dce5ff",
+                        "on-primary-fixed": "#25005a",
+                        "surface-bright": "#393844",
+                        "tertiary-fixed-dim": "#adc6ff",
+                        "surface": "#12121d",
+                        "primary-fixed": "#eaddff",
+                        "on-secondary": "#003640",
+                        "inverse-primary": "#732ee4",
+                        "surface-container": "#1f1f2a",
+                        "on-surface": "#e4e1f0",
+                        "primary-fixed-dim": "#d2bbff",
+                        "tertiary-container": "#0062d2"
+                    },
+                    fontFamily: {
+                        "headline": ["Space Grotesk"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .glass-card {
+            background: rgba(27, 27, 37, 0.7);
+            backdrop-filter: blur(12px);
+            border-top: 1px solid rgba(74, 68, 85, 0.2);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .glass-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(124, 58, 237, 0.15);
+            background: rgba(41, 41, 52, 0.8);
+        }
+        .glow-orb {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(80px);
+            z-index: -1;
+            opacity: 0.15;
+        }
+        .pulse-button {
+            box-shadow: 0 0 0 0 rgba(124, 58, 237, 0.7);
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(124, 58, 237, 0.7); }
+            70% { transform: scale(1.05); box-shadow: 0 0 0 15px rgba(124, 58, 237, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(124, 58, 237, 0); }
+        }
+        .modal-backdrop {
+            transition: opacity 0.3s ease;
+        }
+        .modal-content {
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            background: rgba(27, 27, 37, 0.8) !important;
+            backdrop-filter: blur(16px) !important;
+            border: 1px solid rgba(124, 58, 237, 0.3) !important;
+            box-shadow: 0 0 30px rgba(124, 58, 237, 0.2) !important;
+        }
+        .modal-backdrop.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .modal-backdrop.active .modal-content {
+            transform: scale(1);
+            opacity: 1;
+        }
+        
+        .glow-error { box-shadow: 0 0 15px rgba(255, 180, 171, 0.4); }
+        .glow-warning { box-shadow: 0 0 15px rgba(250, 204, 21, 0.4); }
+        .glow-success { box-shadow: 0 0 15px rgba(76, 215, 246, 0.4); }
+
+    </style>
+</head>
+<body class="overflow-hidden bg-[#12121d] selection:bg-primary-container/30">
+<!-- Background Orbs -->
+<div class="fixed inset-0 overflow-hidden pointer-events-none z-[-1]">
+    <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-primary-container/20 rounded-full blur-[100px] animate-drift-1"></div>
+    <div class="absolute top-2/3 right-1/4 w-80 h-80 bg-secondary-container/20 rounded-full blur-[100px] animate-drift-2"></div>
+    <div class="absolute top-1/2 left-2/3 w-[26rem] h-[26rem] bg-[#5a00c6]/20 rounded-full blur-[100px] animate-drift-3"></div>
+</div>
+<!-- SIDEBAR NAVIGATION -->
+<aside class="fixed left-0 top-0 h-full w-64 flex flex-col py-8 px-4 z-50 bg-[#1b1b25]/70 backdrop-blur-xl border-r border-[#4a4455]/15 shadow-[40px_0_60px_-10px_rgba(210,187,255,0.08)]">
+<div class="mb-10 px-4 flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#7c3aed] to-[#03b5d3] flex items-center justify-center shadow-lg">
+<span class="material-symbols-outlined text-white" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+<div>
+<h1 class="text-2xl font-bold tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-[#7c3aed] to-[#03b5d3] drop-shadow-[0_0_8px_rgba(124,58,237,0.5)] font-headline">SubTrak</h1>
+<p class="text-[10px] uppercase tracking-widest text-[#958da1]">Celestial Engine</p>
+</div>
+</div>
+<nav class="flex-1 space-y-2">
+<a class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-slate-100 hover:backdrop-brightness-110 hover:translate-x-1 transition-all duration-300 group nav-item-glow" href="dashboard.html" id="nav-dashboard">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-body text-sm">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl bg-gradient-to-r from-[#7c3aed]/20 to-transparent border-l-4 border-[#7c3aed] text-[#7c3aed] font-bold shadow-[0_0_15px_rgba(124,58,237,0.3)] transition-all" href="subscriptions.html" id="nav-subscriptions">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">subscriptions</span>
+<span class="font-body text-sm">Subscriptions</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-slate-100 hover:backdrop-brightness-110 hover:translate-x-1 transition-all duration-300 group nav-item-glow" href="categories.html" id="nav-categories">
+<span class="material-symbols-outlined">category</span>
+<span class="font-body text-sm">Categories</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-slate-100 hover:backdrop-brightness-110 hover:translate-x-1 transition-all duration-300 group nav-item-glow" href="settings.html" id="nav-settings">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-body text-sm">Settings</span>
+</a>
+</nav>
+<div class="mt-auto space-y-4 px-4">
+<div class="pt-6 border-t border-[#4a4455]/20">
+<a class="flex items-center gap-3 px-2 py-3 text-slate-400 hover:text-slate-100 transition-all duration-300 cursor-pointer">
+<div class="w-8 h-8 rounded-full bg-gradient-to-tr from-[#7c3aed] to-[#03b5d3] p-[2px]">
+<div class="w-full h-full rounded-full bg-surface-container-low flex items-center justify-center text-primary font-bold text-xs" id="user-avatar">?</div>
+</div>
+<div class="overflow-hidden flex flex-col">
+<span class="font-body text-sm font-bold truncate text-white" id="user-name">Loading...</span>
+</div>
+<span class="material-symbols-outlined text-xs ml-auto hover:text-white" id="btn-logout" title="Logout">logout</span>
+</a>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="ml-64 h-screen overflow-y-auto bg-surface-dim selection:bg-primary-container/30">
+<!-- Top Bar / Search -->
+<header class="sticky top-0 z-40 flex justify-between items-center h-16 px-8 bg-[#12121d]/50 backdrop-blur-md">
+<div class="flex-1 max-w-2xl">
+<div class="relative group hidden md:block">
+<input class="bg-surface-container-lowest border-none ring-1 ring-outline-variant/30 rounded-full py-1.5 pl-10 pr-4 text-sm w-64 focus:ring-secondary-container/50 transition-all placeholder-slate-500" placeholder="Search subscriptions..." type="text" id="search-input"/>
+<span class="material-symbols-outlined absolute left-3 top-1.5 text-slate-500 text-lg group-focus-within:text-secondary transition-colors">search</span>
+</div>
+</div>
+<div class="flex items-center gap-4 text-slate-400">
+<span class="material-symbols-outlined cursor-pointer hover:text-white transition-colors relative">
+notifications
+<span class="absolute top-0 right-0 w-2 h-2 bg-error rounded-full"></span>
+</span>
+<span class="material-symbols-outlined cursor-pointer hover:text-white transition-colors">tune</span>
+</div>
+</header>
+<div class="px-8 mt-8">
+<div class="flex justify-between items-end mb-10">
+<div>
+<h2 class="font-headline text-4xl font-bold tracking-tight mb-2">My Subscriptions</h2>
+<p class="text-slate-400 max-w-md" id="summary-text">Loading subscriptions...</p>
+</div>
+<div class="flex gap-2">
+<button class="px-4 py-2 rounded-lg bg-surface-container-high text-xs font-label uppercase tracking-widest flex items-center gap-2 hover:brightness-125 transition-all">
+<span class="material-symbols-outlined text-sm">filter_list</span> Filter
+</button>
+<button class="px-4 py-2 rounded-lg bg-surface-container-high text-xs font-label uppercase tracking-widest flex items-center gap-2 hover:brightness-125 transition-all">
+<span class="material-symbols-outlined text-sm">sort</span> Sort
+</button>
+</div>
+</div>
+<!-- Loading State -->
+<div id="loading-state" class="flex items-center justify-center py-20">
+<div class="w-12 h-12 border-4 border-primary-container border-t-transparent rounded-full animate-spin"></div>
+</div>
+<!-- Error State -->
+<div id="error-state" class="hidden text-center py-20">
+<span class="material-symbols-outlined text-6xl text-error mb-4">error</span>
+<p class="text-error text-lg" id="error-message">Failed to load subscriptions</p>
+</div>
+<!-- Empty State -->
+<div id="empty-state" class="hidden text-center py-20">
+<span class="material-symbols-outlined text-6xl text-slate-500 mb-4">inbox</span>
+<p class="text-slate-400 text-lg">No subscriptions yet</p>
+<p class="text-slate-500 text-sm mt-2">Click the + button to add your first subscription</p>
+</div>
+<!-- Subscription Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="subscriptions-grid">
+</div>
+</div>
+</div>
+</main>
+<!-- Add Subscription Floating Button -->
+<button class="pulse-button fixed bottom-8 right-8 w-16 h-16 rounded-full bg-gradient-to-br from-primary-container to-secondary-container text-white flex items-center justify-center shadow-2xl z-50 hover:scale-110 transition-transform" id="btn-add">
+<span class="material-symbols-outlined text-3xl">add</span>
+</button>
+<!-- Modal -->
+<div class="modal-backdrop fixed inset-0 bg-background/80 backdrop-blur-md z-[60] flex items-center justify-center opacity-0 pointer-events-none" id="modal">
+<div class="modal-content w-full max-w-md bg-surface-container-low rounded-3xl p-8 border border-outline-variant/20 shadow-2xl transform scale-90 opacity-0">
+<div class="flex justify-between items-center mb-6">
+<h3 class="font-headline text-2xl font-bold" id="modal-title">New Subscription</h3>
+<button class="material-symbols-outlined text-slate-400 hover:text-white cursor-pointer" id="modal-close">close</button>
+</div>
+<form id="subscription-form" class="space-y-4">
+<input type="hidden" id="form-id" value=""/>
+<div class="space-y-1">
+<label class="font-label text-[10px] uppercase tracking-widest text-slate-500">Service Name</label>
+<input class="w-full bg-surface-container-lowest border-none rounded-xl py-3 px-4 focus:ring-2 focus:ring-primary/50" placeholder="e.g. Netflix" type="text" id="form-name" required/>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div class="space-y-1">
+<label class="font-label text-[10px] uppercase tracking-widest text-slate-500">Amount</label>
+<input class="w-full bg-surface-container-lowest border-none rounded-xl py-3 px-4 focus:ring-2 focus:ring-primary/50" placeholder="0.00" type="number" step="0.01" min="0.01" id="form-amount" required/>
+</div>
+<div class="space-y-1">
+<label class="font-label text-[10px] uppercase tracking-widest text-slate-500">Currency</label>
+<input class="w-full bg-surface-container-lowest border-none rounded-xl py-3 px-4 focus:ring-2 focus:ring-primary/50" placeholder="USD" type="text" maxlength="3" id="form-currency" value="USD" required/>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div class="space-y-1">
+<label class="font-label text-[10px] uppercase tracking-widest text-slate-500">Billing Cycle</label>
+<select class="w-full bg-surface-container-lowest border-none rounded-xl py-3 px-4 focus:ring-2 focus:ring-primary/50" id="form-cycle" required>
+<option value="MONTHLY">Monthly</option>
+<option value="YEARLY">Yearly</option>
+<option value="WEEKLY">Weekly</option>
+<option value="QUARTERLY">Quarterly</option>
+</select>
+</div>
+<div class="space-y-1">
+<label class="font-label text-[10px] uppercase tracking-widest text-slate-500">Next Renewal</label>
+<input class="w-full bg-surface-container-lowest border-none rounded-xl py-3 px-4 focus:ring-2 focus:ring-primary/50" type="date" id="form-date" required/>
+</div>
+</div>
+<div class="space-y-1">
+<label class="font-label text-[10px] uppercase tracking-widest text-slate-500">Category</label>
+<select class="w-full bg-surface-container-lowest border-none rounded-xl py-3 px-4 focus:ring-2 focus:ring-primary/50" id="form-category">
+<option value="">Uncategorized</option>
+</select>
+</div>
+<div class="space-y-1">
+<label class="font-label text-[10px] uppercase tracking-widest text-slate-500">Notes (optional)</label>
+<textarea class="w-full bg-surface-container-lowest border-none rounded-xl py-3 px-4 focus:ring-2 focus:ring-primary/50 resize-none" rows="2" placeholder="Additional notes..." id="form-notes"></textarea>
+</div>
+<div id="form-error" class="hidden text-error text-sm text-center py-2"></div>
+<button type="submit" class="w-full py-4 mt-4 rounded-xl bg-gradient-to-r from-primary-container to-secondary-container font-bold text-on-primary shadow-lg hover:brightness-110 transition-all flex items-center justify-center gap-2" id="form-submit">
+<span id="form-submit-text">Add Subscription</span>
+<div id="form-spinner" class="hidden w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+</button>
+</form>
+</div>
+</div>
+
+<script>
+const API_BASE = 'http://localhost:8080';
+let accessToken = null;
+let refreshToken = null;
+let currentUser = null;
+let subscriptions = [];
+let categories = [];
+
+document.addEventListener('DOMContentLoaded', () => {
+    const auth = localStorage.getItem('subtrak_auth');
+    if (!auth) {
+        window.location.href = 'index.html';
+        return;
+    }
+    
+    const authData = JSON.parse(auth);
+    accessToken = authData.accessToken;
+    refreshToken = authData.refreshToken;
+    currentUser = authData.user;
+    
+    if (currentUser) {
+        document.getElementById('user-name').textContent = currentUser.name || 'User';
+        document.getElementById('user-avatar').textContent = (currentUser.name || 'U').charAt(0).toUpperCase();
+    }
+    
+    loadCategories();
+    loadSubscriptions();
+});
+
+async function apiCall(url, options = {}) {
+    options.headers = {
+        ...options.headers,
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json'
+    };
+    
+    let response = await fetch(url, options);
+    
+    if (response.status === 401) {
+        const refreshed = await tryRefreshToken();
+        if (refreshed) {
+            options.headers['Authorization'] = `Bearer ${accessToken}`;
+            response = await fetch(url, options);
+        } else {
+            window.location.href = 'index.html';
+            return null;
+        }
+    }
+    
+    return response;
+}
+
+async function tryRefreshToken() {
+    try {
+        const response = await fetch(`${API_BASE}/api/auth/refresh`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ refreshToken })
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            accessToken = data.accessToken;
+            refreshToken = data.refreshToken;
+            localStorage.setItem('subtrak_auth', JSON.stringify(data));
+            return true;
+        }
+    } catch (e) {
+        console.error('Token refresh failed:', e);
+    }
+    localStorage.removeItem('subtrak_auth');
+    return false;
+}
+
+async function loadCategories() {
+    try {
+        const response = await apiCall(`${API_BASE}/api/categories`);
+        if (response && response.ok) {
+            categories = await response.json();
+            const select = document.getElementById('form-category');
+            select.innerHTML = '<option value="">Uncategorized</option>';
+            categories.forEach(cat => {
+                select.innerHTML += `<option value="${cat.id}">${cat.icon || ''} ${cat.name}</option>`;
+            });
+        }
+    } catch (e) {
+        console.error('Failed to load categories:', e);
+    }
+}
+
+async function loadSubscriptions() {
+    const loadingState = document.getElementById('loading-state');
+    const errorState = document.getElementById('error-state');
+    const emptyState = document.getElementById('empty-state');
+    const grid = document.getElementById('subscriptions-grid');
+    
+    loadingState.classList.remove('hidden');
+    errorState.classList.add('hidden');
+    emptyState.classList.add('hidden');
+    grid.innerHTML = '';
+    
+    try {
+        const response = await apiCall(`${API_BASE}/api/subscriptions`);
+        loadingState.classList.add('hidden');
+        
+        if (!response || !response.ok) {
+            throw new Error('Failed to load subscriptions');
+        }
+        
+        subscriptions = await response.json();
+        
+        if (subscriptions.length === 0) {
+            emptyState.classList.remove('hidden');
+            document.getElementById('summary-text').textContent = 'No active subscriptions';
+            return;
+        }
+        
+        const activeCount = subscriptions.filter(s => s.active).length;
+        const totalMonthly = subscriptions.filter(s => s.active).reduce((sum, s) => {
+            let monthly = parseFloat(s.amount);
+            switch (s.billingCycle) {
+                case 'WEEKLY': monthly = monthly * 52 / 12; break;
+                case 'QUARTERLY': monthly = monthly / 3; break;
+                case 'YEARLY': monthly = monthly / 12; break;
+            }
+            return sum + monthly;
+        }, 0);
+        
+        document.getElementById('summary-text').innerHTML = `Tracking ${activeCount} active services with a total monthly burn of <span class="text-primary font-bold">$${totalMonthly.toFixed(2)}</span>`;
+        
+        renderSubscriptions(subscriptions);
+        
+    } catch (e) {
+        loadingState.classList.add('hidden');
+        errorState.classList.remove('hidden');
+        document.getElementById('error-message').textContent = e.message;
+    }
+}
+
+function renderSubscriptions(subs) {
+    const grid = document.getElementById('subscriptions-grid');
+    const searchTerm = document.getElementById('search-input').value.toLowerCase();
+    
+    const filtered = subs.filter(s => s.name.toLowerCase().includes(searchTerm));
+    
+    if (filtered.length === 0 && searchTerm) {
+        grid.innerHTML = '<div class="col-span-full text-center py-10 text-slate-400">No subscriptions match your search</div>';
+        return;
+    }
+    
+    grid.innerHTML = filtered.map(sub => {
+        const daysUntil = Math.ceil((new Date(sub.nextRenewalDate) - new Date()) / (1000 * 60 * 60 * 24));
+        let urgencyClass, urgencyText, glowClass;
+        
+        if (daysUntil <= 3) {
+            urgencyClass = 'bg-error-container/20 text-error';
+            glowClass = 'glow-error border-error/50';
+            urgencyText = daysUntil <= 0 ? 'OVERDUE' : daysUntil === 1 ? 'URGENT' : `IN ${daysUntil}D`;
+        } else if (daysUntil <= 14) {
+            urgencyClass = 'bg-yellow-500/10 text-yellow-400';
+            glowClass = 'glow-warning border-yellow-500/50';
+            urgencyText = 'PENDING';
+        } else {
+            urgencyClass = 'bg-secondary/10 text-secondary';
+            glowClass = 'glow-success border-primary/30';
+            urgencyText = 'STABLE';
+        }
+        
+        const categoryName = sub.category ? sub.category.name : 'Uncategorized';
+        const categoryColor = sub.category?.color || '#7c3aed';
+        const icon = getIconForCategory(categoryName);
+        
+        return `
+        <div class="glass-card rounded-2xl p-6 relative overflow-hidden group card-animate visible ${!sub.active ? 'opacity-50' : ''} ${glowClass}" data-id="${sub.id}">
+            <div class="flex justify-between items-start mb-6">
+                <div class="w-12 h-12 rounded-xl flex items-center justify-center" style="background: ${categoryColor}20;">
+                    <span class="material-symbols-outlined" style="color: ${categoryColor};">${icon}</span>
+                </div>
+                <span class="px-3 py-1 rounded-full bg-secondary/10 text-secondary text-[10px] font-bold uppercase tracking-wider">${categoryName}</span>
+            </div>
+            <h3 class="font-headline text-xl font-bold mb-1">${sub.name}</h3>
+            <p class="text-slate-500 text-sm mb-4">${sub.billingCycle.charAt(0) + sub.billingCycle.slice(1).toLowerCase()} • ${sub.active ? 'Active' : 'Inactive'}</p>
+            <div class="flex items-end justify-between">
+                <p class="font-headline text-2xl font-bold text-on-surface">${sub.currency} ${parseFloat(sub.amount).toFixed(2)}<span class="text-xs text-slate-500 font-normal ml-1">/${sub.billingCycle.toLowerCase().substring(0, 2)}</span></p>
+                <div class="text-right">
+                    <p class="text-[10px] font-label uppercase text-slate-500 tracking-tighter mb-1">Status</p>
+                    <span class="px-2 py-1 rounded technical-label ${urgencyClass} border border-white/10 ${glowClass}">${urgencyText}</span>
+                </div>
+            </div>
+            <div class="absolute inset-x-0 bottom-0 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out bg-[#1b1b25]/90 backdrop-blur-md border-t border-[#7c3aed]/30 p-4 flex gap-2">
+                <button class="flex-1 py-2 rounded-lg bg-surface-container-highest text-xs font-bold hover:bg-primary/20 hover:text-white transition-colors btn-edit" data-id="${sub.id}">Edit</button>
+                <button class="flex-1 py-2 rounded-lg bg-surface-container-highest text-xs font-bold hover:bg-error/20 hover:text-error transition-colors btn-delete" data-id="${sub.id}">Delete</button>
+            </div>
+        </div>
+        `;
+    }).join('');
+    
+    // Trigger card entrance animation stagger
+    setTimeout(() => {
+        document.querySelectorAll('.card-animate').forEach((card, i) => {
+            setTimeout(() => card.classList.add('visible'), i * 100);
+        });
+    }, 50);
+    
+    document.querySelectorAll('.btn-edit').forEach(btn => {
+        btn.addEventListener('click', () => editSubscription(btn.dataset.id));
+    });
+    document.querySelectorAll('.btn-delete').forEach(btn => {
+        btn.addEventListener('click', () => deleteSubscription(btn.dataset.id));
+    });
+}
+
+function getIconForCategory(category) {
+    const icons = {
+        'Entertainment': 'movie',
+        'Software': 'terminal',
+        'Music': 'music_note',
+        'Audio': 'music_note',
+        'Creative': 'brush',
+        'Development': 'code',
+        'AI': 'smart_toy',
+        'Design': 'design_services',
+        'Utilities': 'electric_bolt',
+        'Health': 'fitness_center',
+        'Fitness': 'fitness_center'
+    };
+    for (const [key, icon] of Object.entries(icons)) {
+        if (category.toLowerCase().includes(key.toLowerCase())) return icon;
+    }
+    return 'subscriptions';
+}
+
+document.getElementById('search-input').addEventListener('input', () => {
+    renderSubscriptions(subscriptions);
+});
+
+document.getElementById('btn-add').addEventListener('click', () => {
+    document.getElementById('modal-title').textContent = 'New Subscription';
+    document.getElementById('form-submit-text').textContent = 'Add Subscription';
+    document.getElementById('form-id').value = '';
+    document.getElementById('subscription-form').reset();
+    document.getElementById('form-currency').value = 'USD';
+    document.getElementById('form-date').value = new Date().toISOString().split('T')[0];
+    openModal();
+});
+
+document.getElementById('modal-close').addEventListener('click', closeModal);
+document.getElementById('modal').addEventListener('click', (e) => {
+    if (e.target.id === 'modal') closeModal();
+});
+
+function openModal() {
+    document.getElementById('modal').classList.add('active');
+    document.getElementById('form-error').classList.add('hidden');
+}
+
+function closeModal() {
+    document.getElementById('modal').classList.remove('active');
+}
+
+function editSubscription(id) {
+    const sub = subscriptions.find(s => s.id === id);
+    if (!sub) return;
+    
+    document.getElementById('modal-title').textContent = 'Edit Subscription';
+    document.getElementById('form-submit-text').textContent = 'Update Subscription';
+    document.getElementById('form-id').value = sub.id;
+    document.getElementById('form-name').value = sub.name;
+    document.getElementById('form-amount').value = sub.amount;
+    document.getElementById('form-currency').value = sub.currency;
+    document.getElementById('form-cycle').value = sub.billingCycle;
+    document.getElementById('form-date').value = sub.nextRenewalDate;
+    document.getElementById('form-category').value = sub.category?.id || '';
+    document.getElementById('form-notes').value = sub.notes || '';
+    
+    openModal();
+}
+
+async function deleteSubscription(id) {
+    if (!confirm('Are you sure you want to delete this subscription?')) return;
+    
+    try {
+        const response = await apiCall(`${API_BASE}/api/subscriptions/${id}`, {
+            method: 'DELETE'
+        });
+        
+        if (response && response.ok) {
+            loadSubscriptions();
+        } else {
+            alert('Failed to delete subscription');
+        }
+    } catch (e) {
+        alert('Error: ' + e.message);
+    }
+}
+
+document.getElementById('subscription-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const formError = document.getElementById('form-error');
+    const submitBtn = document.getElementById('form-submit');
+    const submitText = document.getElementById('form-submit-text');
+    const spinner = document.getElementById('form-spinner');
+    
+    formError.classList.add('hidden');
+    submitBtn.disabled = true;
+    spinner.classList.remove('hidden');
+    
+    const id = document.getElementById('form-id').value;
+    const isEdit = !!id;
+    
+    const data = {
+        name: document.getElementById('form-name').value.trim(),
+        amount: parseFloat(document.getElementById('form-amount').value),
+        currency: document.getElementById('form-currency').value.toUpperCase().trim(),
+        billingCycle: document.getElementById('form-cycle').value,
+        nextRenewalDate: document.getElementById('form-date').value,
+        categoryId: document.getElementById('form-category').value || null,
+        notes: document.getElementById('form-notes').value.trim() || null
+    };
+    
+    try {
+        const url = isEdit ? `${API_BASE}/api/subscriptions/${id}` : `${API_BASE}/api/subscriptions`;
+        const method = isEdit ? 'PUT' : 'POST';
+        
+        const response = await apiCall(url, {
+            method,
+            body: JSON.stringify(data)
+        });
+        
+        if (response && response.ok) {
+            closeModal();
+            loadSubscriptions();
+        } else {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to save subscription');
+        }
+    } catch (e) {
+        formError.textContent = e.message;
+        formError.classList.remove('hidden');
+    } finally {
+        submitBtn.disabled = false;
+        spinner.classList.add('hidden');
+    }
+});
+
+document.getElementById('btn-logout').addEventListener('click', async () => {
+    try {
+        await fetch(`${API_BASE}/api/auth/logout`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ refreshToken })
+        });
+    } catch (e) {
+        console.error('Logout error:', e);
+    }
+    localStorage.removeItem('subtrak_auth');
+    window.location.href = 'index.html';
+});
+</script>
+</body></html>

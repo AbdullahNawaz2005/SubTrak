@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>SubTrak - Spending Categories</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "surface-container-low": "#1b1b25",
+                        "on-primary-fixed-variant": "#5a00c6",
+                        "on-primary-fixed": "#25005a",
+                        "inverse-surface": "#e4e1f0",
+                        "on-tertiary-fixed": "#001a42",
+                        "surface-dim": "#12121d",
+                        "inverse-primary": "#732ee4",
+                        "primary-container": "#7c3aed",
+                        "outline": "#958da1",
+                        "tertiary-fixed-dim": "#adc6ff",
+                        "secondary": "#4cd7f6",
+                        "primary": "#d2bbff",
+                        "tertiary": "#adc6ff",
+                        "on-surface-variant": "#ccc3d8",
+                        "primary-fixed-dim": "#d2bbff",
+                        "on-tertiary-fixed-variant": "#004395",
+                        "primary-fixed": "#eaddff",
+                        "on-tertiary-container": "#dce5ff",
+                        "on-secondary-container": "#00424e",
+                        "on-primary-container": "#ede0ff",
+                        "surface-variant": "#34343f",
+                        "surface": "#12121d",
+                        "on-secondary-fixed": "#001f26",
+                        "secondary-fixed-dim": "#4cd7f6",
+                        "surface-container-high": "#292934",
+                        "on-primary": "#3f008e",
+                        "tertiary-container": "#0062d2",
+                        "surface-bright": "#393844",
+                        "secondary-fixed": "#acedff",
+                        "secondary-container": "#03b5d3",
+                        "surface-container-lowest": "#0d0d17",
+                        "surface-tint": "#d2bbff",
+                        "error-container": "#93000a",
+                        "on-tertiary": "#002e6a",
+                        "on-secondary": "#003640",
+                        "inverse-on-surface": "#302f3b",
+                        "surface-container": "#1f1f2a",
+                        "on-surface": "#e4e1f0",
+                        "on-secondary-fixed-variant": "#004e5c",
+                        "background": "#12121d",
+                        "on-background": "#e4e1f0",
+                        "error": "#ffb4ab",
+                        "tertiary-fixed": "#d8e2ff",
+                        "on-error": "#690005",
+                        "on-error-container": "#ffdad6",
+                        "outline-variant": "#4a4455",
+                        "surface-container-highest": "#34343f"
+                    },
+                    fontFamily: {
+                        "headline": ["Space Grotesk"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            background-color: #080812;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(124, 58, 237, 0.05) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(3, 181, 211, 0.05) 0px, transparent 50%);
+            color: #e4e1f0;
+            font-family: 'Inter', sans-serif;
+        }
+        .glass-panel {
+            background: rgba(27, 27, 37, 0.7);
+            backdrop-filter: blur(12px);
+            border-top: 1px solid rgba(74, 68, 85, 0.2);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .glass-panel:hover {
+            transform: translateY(-4px);
+            border-top: 1px solid rgba(124, 58, 237, 0.4);
+            /* Box shadow dynamic in JS */
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .active-glow {
+            box-shadow: 0 0 15px rgba(124, 58, 237, 0.3);
+        }
+
+        /* Nav Item Hover Glow */
+        .nav-item-glow {
+            position: relative;
+        }
+        .nav-item-glow::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: #7c3aed;
+            box-shadow: 0 0 15px #7c3aed;
+            transform: scaleY(0);
+            transform-origin: center;
+            transition: transform 0.3s ease;
+            border-top-right-radius: 4px;
+            border-bottom-right-radius: 4px;
+        }
+        .nav-item-glow:hover::before {
+            transform: scaleY(1);
+        }
+
+        /* Page Load Card Animation */
+        .card-animate {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease;
+        }
+        .card-animate.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Drift animation for orbs */
+        @keyframes drift {
+            0% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(30px, -50px) scale(1.1); }
+            66% { transform: translate(-20px, 20px) scale(0.9); }
+            100% { transform: translate(0, 0) scale(1); }
+        }
+        .animate-drift-1 { animation: drift 15s infinite alternate ease-in-out; }
+        .animate-drift-2 { animation: drift 18s infinite alternate-reverse ease-in-out; }
+        .animate-drift-3 { animation: drift 20s infinite alternate ease-in-out; }
+        /* Modal & Specific Styles */
+        .modal-backdrop {
+            transition: opacity 0.3s ease;
+        }
+        .modal-content {
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            background: rgba(27, 27, 37, 0.8) !important;
+            backdrop-filter: blur(16px) !important;
+            border: 1px solid rgba(124, 58, 237, 0.3) !important;
+            box-shadow: 0 0 30px rgba(124, 58, 237, 0.2) !important;
+        }
+        .modal-backdrop.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .modal-backdrop.active .modal-content {
+            transform: scale(1);
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="overflow-hidden bg-[#12121d] selection:bg-primary-container/30">
+<!-- Background Orbs -->
+<div class="fixed inset-0 overflow-hidden pointer-events-none z-[-1]">
+    <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-primary-container/20 rounded-full blur-[100px] animate-drift-1"></div>
+    <div class="absolute top-2/3 right-1/4 w-80 h-80 bg-secondary-container/20 rounded-full blur-[100px] animate-drift-2"></div>
+    <div class="absolute top-1/2 left-2/3 w-[26rem] h-[26rem] bg-[#5a00c6]/20 rounded-full blur-[100px] animate-drift-3"></div>
+</div>
+<!-- SIDEBAR NAVIGATION -->
+<aside class="fixed left-0 top-0 h-full w-64 flex flex-col py-8 px-4 z-50 bg-[#1b1b25]/70 backdrop-blur-xl border-r border-[#4a4455]/15 shadow-[40px_0_60px_-10px_rgba(210,187,255,0.08)]">
+<div class="mb-10 px-4 flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#7c3aed] to-[#03b5d3] flex items-center justify-center shadow-lg">
+<span class="material-symbols-outlined text-white" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+<div>
+<h1 class="text-2xl font-bold tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-[#7c3aed] to-[#03b5d3] drop-shadow-[0_0_8px_rgba(124,58,237,0.5)] font-headline">SubTrak</h1>
+<p class="text-[10px] uppercase tracking-widest text-[#958da1]">Celestial Engine</p>
+</div>
+</div>
+<nav class="flex-1 space-y-2">
+<a class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-slate-100 hover:backdrop-brightness-110 hover:translate-x-1 transition-all duration-300 group nav-item-glow" href="dashboard.html" id="nav-dashboard">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-body text-sm">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-slate-100 hover:backdrop-brightness-110 hover:translate-x-1 transition-all duration-300 group nav-item-glow" href="subscriptions.html" id="nav-subscriptions">
+<span class="material-symbols-outlined">subscriptions</span>
+<span class="font-body text-sm">Subscriptions</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl bg-gradient-to-r from-[#7c3aed]/20 to-transparent border-l-4 border-[#7c3aed] text-[#7c3aed] font-bold shadow-[0_0_15px_rgba(124,58,237,0.3)] transition-all" href="categories.html" id="nav-categories">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">category</span>
+<span class="font-body text-sm">Categories</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-slate-100 hover:backdrop-brightness-110 hover:translate-x-1 transition-all duration-300 group nav-item-glow" href="settings.html" id="nav-settings">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-body text-sm">Settings</span>
+</a>
+</nav>
+    </style>
+</head>
+<body class="font-body text-on-surface selection:bg-primary-container/30">
+<!-- Background Orbs -->
+<div class="fixed inset-0 overflow-hidden pointer-events-none">
+<div class="orb w-[500px] h-[500px] bg-primary-container top-[-10%] left-[-10%] animate-pulse"></div>
+<div class="orb w-[400px] h-[400px] bg-secondary-container bottom-[-10%] right-[-10%] animate-pulse" style="animation-delay: 2s;"></div>
+<div class="orb w-[300px] h-[300px] bg-tertiary-container top-[40%] right-[20%] opacity-20"></div>
+</div>
+<!-- SideNavBar -->
+<aside class="h-screen w-64 fixed left-0 top-0 border-r border-white/5 bg-slate-900/60 dark:bg-[#12121d]/60 backdrop-blur-xl shadow-[20px_0_50px_rgba(124,58,237,0.05)] flex flex-col h-full p-6 justify-between z-50">
+<div class="space-y-8">
+<div class="flex flex-col gap-1">
+<span class="text-2xl font-bold tracking-tighter text-[#7c3aed] font-headline">SubTrak</span>
+<span class="text-[10px] uppercase tracking-widest text-slate-500 font-medium">The Celestial Engine</span>
+</div>
+<nav class="space-y-2">
+<a class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-white transition-colors hover:bg-white/10 transition-all duration-300 rounded-lg" href="dashboard.html">
+<span class="material-symbols-outlined text-lg">dashboard</span>
+<span class="text-sm font-medium">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-white transition-colors hover:bg-white/10 transition-all duration-300 rounded-lg" href="subscriptions.html">
+<span class="material-symbols-outlined text-lg">subscriptions</span>
+<span class="text-sm font-medium">Subscriptions</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-[#7c3aed] font-bold bg-white/5 rounded-lg transition-all duration-300" href="categories.html">
+<span class="material-symbols-outlined text-lg">category</span>
+<span class="text-sm font-medium">Categories</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-white transition-colors hover:bg-white/10 transition-all duration-300 rounded-lg" href="settings.html">
+<span class="material-symbols-outlined text-lg">settings</span>
+<span class="text-sm font-medium">Settings</span>
+</a>
+</nav>
+</div>
+<div class="mt-auto space-y-4 px-4">
+<div class="pt-6 border-t border-[#4a4455]/20">
+<a class="flex items-center gap-3 px-2 py-3 text-slate-400 hover:text-slate-100 transition-all duration-300 cursor-pointer">
+<div class="w-8 h-8 rounded-full bg-gradient-to-tr from-[#7c3aed] to-[#03b5d3] p-[2px]">
+<div class="w-full h-full rounded-full bg-surface-container-low flex items-center justify-center text-primary font-bold text-xs" id="user-avatar">?</div>
+</div>
+<div class="overflow-hidden flex flex-col">
+<span class="font-body text-sm font-bold truncate text-white" id="user-name">Loading...</span>
+</div>
+<span class="material-symbols-outlined text-xs ml-auto hover:text-white" id="btn-logout" title="Logout">logout</span>
+</a>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="ml-64 h-screen overflow-y-auto bg-surface-dim selection:bg-primary-container/30">
+<!-- Top Bar / Search -->
+<header class="sticky top-0 z-40 flex justify-between items-center h-16 px-8 bg-[#12121d]/50 backdrop-blur-md">
+<div class="flex flex-col">
+<span class="text-xs font-bold text-white" id="user-name">Loading...</span>
+<span class="text-[10px] text-slate-500">Premium Plan</span>
+</div>
+<span class="material-symbols-outlined text-slate-400 ml-auto cursor-pointer hover:text-white" id="btn-logout" title="Logout">logout</span>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="ml-64 min-h-screen">
+<!-- TopAppBar -->
+<header class="w-full sticky top-0 z-40 bg-transparent flex items-center justify-between px-8 py-4 w-full">
+<div class="flex-1 max-w-2xl">
+<div class="relative group hidden md:block">
+<input class="bg-surface-container-lowest border-none ring-1 ring-outline-variant/30 rounded-full py-1.5 pl-10 pr-4 text-sm w-64 focus:ring-secondary-container/50 transition-all placeholder-slate-500" placeholder="Search categories..." type="text" id="search-input"/>
+<span class="material-symbols-outlined absolute left-3 top-1.5 text-slate-500 text-lg group-focus-within:text-secondary transition-colors">search</span>
+</div>
+</div>
+<div class="flex items-center gap-4 text-slate-400">
+<span class="material-symbols-outlined cursor-pointer hover:text-white transition-colors relative">
+notifications
+<span class="absolute top-0 right-0 w-2 h-2 bg-error rounded-full"></span>
+</span>
+<span class="material-symbols-outlined cursor-pointer hover:text-white transition-colors">tune</span>
+</div>
+</header>
+<div class="p-8 max-w-7xl mx-auto space-y-12">
+<!-- Hero Header Section -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-8">
+<div class="space-y-2">
+<h1 class="text-5xl font-bold font-headline tracking-tight text-white">Spending Categories</h1>
+<p class="text-on-surface-variant text-lg max-w-md">Optimize your digital overhead with granular category tracking.</p>
+</div>
+<div class="glass-panel p-6 rounded-2xl flex flex-col gap-1 border-l-4 border-[#7c3aed]">
+<span class="text-xs font-bold uppercase tracking-widest text-slate-500">Total Monthly Spend</span>
+<span class="text-4xl font-bold font-headline text-white" id="total-spend">$0.00</span>
+</div>
+</div>
+<!-- Loading State -->
+<div id="loading-state" class="flex items-center justify-center py-20">
+<div class="w-12 h-12 border-4 border-primary-container border-t-transparent rounded-full animate-spin"></div>
+</div>
+<!-- Error State -->
+<div id="error-state" class="hidden text-center py-20">
+<span class="material-symbols-outlined text-6xl text-error mb-4">error</span>
+<p class="text-error text-lg" id="error-message">Failed to load categories</p>
+</div>
+<!-- Empty State -->
+<div id="empty-state" class="hidden text-center py-20">
+<span class="material-symbols-outlined text-6xl text-slate-500 mb-4">folder_off</span>
+<p class="text-slate-400 text-lg">No categories yet</p>
+<p class="text-slate-500 text-sm mt-2">Click the + button to create your first category</p>
+</div>
+<!-- Category Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" id="categories-grid">
+</div>
+<!-- Subscription Distribution -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8 pt-8" id="distribution-section" style="display: none;">
+<div class="lg:col-span-2 glass-panel p-10 rounded-[2.5rem] relative overflow-hidden">
+<div class="absolute top-[-10%] left-[-10%] w-64 h-64 bg-primary-container/5 blur-[100px] pointer-events-none"></div>
+<h2 class="text-2xl font-bold font-headline mb-8 text-white">Subscription Distribution</h2>
+<div class="space-y-8" id="subscription-list">
+</div>
+</div>
+<div class="glass-panel p-10 rounded-[2.5rem] bg-gradient-to-br from-primary-container/10 to-transparent border-t border-white/10">
+<h2 class="text-2xl font-bold font-headline mb-6 text-white">Quick Stats</h2>
+<div class="space-y-6">
+<div class="p-5 rounded-2xl bg-white/5 border border-white/5 space-y-3">
+<div class="flex items-center gap-3 text-secondary">
+<span class="material-symbols-outlined">analytics</span>
+<span class="text-sm font-bold uppercase tracking-wider">Categories</span>
+</div>
+<p class="text-3xl font-bold text-white" id="category-count">0</p>
+</div>
+<div class="p-5 rounded-2xl bg-white/5 border border-white/5 space-y-3">
+<div class="flex items-center gap-3 text-primary">
+<span class="material-symbols-outlined">subscriptions</span>
+<span class="text-sm font-bold uppercase tracking-wider">Subscriptions</span>
+</div>
+<p class="text-3xl font-bold text-white" id="subscription-count">0</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- FAB -->
+<button class="fixed bottom-8 right-8 w-14 h-14 bg-gradient-to-br from-primary-container to-secondary-container rounded-full flex items-center justify-center text-white shadow-[0_10px_30px_rgba(124,58,237,0.5)] active:scale-90 transition-transform z-50" id="btn-add">
+<span class="material-symbols-outlined text-3xl">add</span>
+</button>
+<!-- Modal -->
+<div class="modal-backdrop fixed inset-0 bg-background/80 backdrop-blur-md z-[60] flex items-center justify-center opacity-0 pointer-events-none" id="modal">
+<div class="modal-content w-full max-w-md bg-surface-container-low rounded-3xl p-8 border border-outline-variant/20 shadow-2xl transform scale-90 opacity-0">
+<div class="flex justify-between items-center mb-6">
+<h3 class="font-headline text-2xl font-bold" id="modal-title">New Category</h3>
+<button class="material-symbols-outlined text-slate-400 hover:text-white cursor-pointer" id="modal-close">close</button>
+</div>
+<form id="category-form" class="space-y-4">
+<input type="hidden" id="form-id" value=""/>
+<div class="space-y-1">
+<label class="font-label text-[10px] uppercase tracking-widest text-slate-500">Category Name</label>
+<input class="w-full bg-surface-container-lowest border-none rounded-xl py-3 px-4 focus:ring-2 focus:ring-primary/50" placeholder="e.g. Entertainment" type="text" id="form-name" required maxlength="50"/>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div class="space-y-1">
+<label class="font-label text-[10px] uppercase tracking-widest text-slate-500">Color</label>
+<input class="w-full h-12 bg-surface-container-lowest border-none rounded-xl cursor-pointer" type="color" id="form-color" value="#7c3aed"/>
+</div>
+<div class="space-y-1">
+<label class="font-label text-[10px] uppercase tracking-widest text-slate-500">Icon (Emoji)</label>
+<input class="w-full bg-surface-container-lowest border-none rounded-xl py-3 px-4 focus:ring-2 focus:ring-primary/50 text-center text-2xl" placeholder="📺" type="text" id="form-icon" maxlength="10"/>
+</div>
+</div>
+<div id="form-error" class="hidden text-error text-sm text-center py-2"></div>
+<button type="submit" class="w-full py-4 mt-4 rounded-xl bg-gradient-to-r from-primary-container to-secondary-container font-bold text-on-primary shadow-lg hover:brightness-110 transition-all flex items-center justify-center gap-2" id="form-submit">
+<span id="form-submit-text">Create Category</span>
+<div id="form-spinner" class="hidden w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+</button>
+</form>
+</div>
+</div>
+
+<script>
+const API_BASE = 'http://localhost:8080';
+let accessToken = null;
+let refreshToken = null;
+let currentUser = null;
+let categories = [];
+let subscriptions = [];
+
+document.addEventListener('DOMContentLoaded', () => {
+    const auth = localStorage.getItem('subtrak_auth');
+    if (!auth) {
+        window.location.href = 'index.html';
+        return;
+    }
+    
+    const authData = JSON.parse(auth);
+    accessToken = authData.accessToken;
+    refreshToken = authData.refreshToken;
+    currentUser = authData.user;
+    
+    if (currentUser) {
+        document.getElementById('user-name').textContent = currentUser.name || 'User';
+        document.getElementById('user-avatar').textContent = (currentUser.name || 'U').charAt(0).toUpperCase();
+    }
+    
+    loadData();
+});
+
+async function apiCall(url, options = {}) {
+    options.headers = {
+        ...options.headers,
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json'
+    };
+    
+    let response = await fetch(url, options);
+    
+    if (response.status === 401) {
+        const refreshed = await tryRefreshToken();
+        if (refreshed) {
+            options.headers['Authorization'] = `Bearer ${accessToken}`;
+            response = await fetch(url, options);
+        } else {
+            window.location.href = 'index.html';
+            return null;
+        }
+    }
+    
+    return response;
+}
+
+async function tryRefreshToken() {
+    try {
+        const response = await fetch(`${API_BASE}/api/auth/refresh`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ refreshToken })
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            accessToken = data.accessToken;
+            refreshToken = data.refreshToken;
+            localStorage.setItem('subtrak_auth', JSON.stringify(data));
+            return true;
+        }
+    } catch (e) {
+        console.error('Token refresh failed:', e);
+    }
+    localStorage.removeItem('subtrak_auth');
+    return false;
+}
+
+async function loadData() {
+    const loadingState = document.getElementById('loading-state');
+    const errorState = document.getElementById('error-state');
+    const emptyState = document.getElementById('empty-state');
+    const grid = document.getElementById('categories-grid');
+    const distSection = document.getElementById('distribution-section');
+    
+    loadingState.classList.remove('hidden');
+    errorState.classList.add('hidden');
+    emptyState.classList.add('hidden');
+    grid.innerHTML = '';
+    distSection.style.display = 'none';
+    
+    try {
+        const [catResponse, subResponse] = await Promise.all([
+            apiCall(`${API_BASE}/api/categories`),
+            apiCall(`${API_BASE}/api/subscriptions`)
+        ]);
+        
+        loadingState.classList.add('hidden');
+        
+        if (!catResponse || !catResponse.ok) {
+            throw new Error('Failed to load categories');
+        }
+        
+        categories = await catResponse.json();
+        subscriptions = subResponse && subResponse.ok ? await subResponse.json() : [];
+        
+        const activeSubscriptions = subscriptions.filter(s => s.active);
+        const totalMonthly = activeSubscriptions.reduce((sum, s) => {
+            let monthly = parseFloat(s.amount);
+            switch (s.billingCycle) {
+                case 'WEEKLY': monthly = monthly * 52 / 12; break;
+                case 'QUARTERLY': monthly = monthly / 3; break;
+                case 'YEARLY': monthly = monthly / 12; break;
+            }
+            return sum + monthly;
+        }, 0);
+        
+        document.getElementById('total-spend').textContent = `$${totalMonthly.toFixed(2)}`;
+        document.getElementById('category-count').textContent = categories.length;
+        document.getElementById('subscription-count').textContent = activeSubscriptions.length;
+        
+        if (categories.length === 0) {
+            emptyState.classList.remove('hidden');
+            return;
+        }
+        
+        renderCategories();
+        renderSubscriptionList();
+        distSection.style.display = 'grid';
+        
+    } catch (e) {
+        loadingState.classList.add('hidden');
+        errorState.classList.remove('hidden');
+        document.getElementById('error-message').textContent = e.message;
+    }
+}
+
+function renderCategories() {
+    const grid = document.getElementById('categories-grid');
+    const searchTerm = document.getElementById('search-input').value.toLowerCase();
+    
+    const filtered = categories.filter(c => c.name.toLowerCase().includes(searchTerm));
+    
+    grid.innerHTML = filtered.map(cat => {
+        const catSubs = subscriptions.filter(s => s.active && s.category?.id === cat.id);
+        const monthlyTotal = catSubs.reduce((sum, s) => {
+            let monthly = parseFloat(s.amount);
+            switch (s.billingCycle) {
+                case 'WEEKLY': monthly = monthly * 52 / 12; break;
+                case 'QUARTERLY': monthly = monthly / 3; break;
+                case 'YEARLY': monthly = monthly / 12; break;
+            }
+            return sum + monthly;
+        }, 0);
+        
+        const budgetUsage = Math.min(100, (monthlyTotal / 200) * 100);
+        const statusColor = budgetUsage > 80 ? 'orange' : budgetUsage > 50 ? 'primary-container' : 'secondary';
+        const statusText = budgetUsage > 80 ? 'Critical' : budgetUsage > 50 ? 'Standard' : 'Active';
+        
+        return `
+        <div class="group glass-panel p-8 rounded-[2rem] hover:translate-y-[-5px] transition-all duration-500 cursor-pointer relative overflow-hidden card-animate visible" data-id="${cat.id}" onmouseover="this.style.boxShadow='0 20px 40px -15px ${cat.color}99'" onmouseout="this.style.boxShadow=''">
+            <div class="absolute top-0 right-0 w-32 h-32 blur-[50px] rounded-full" style="background: ${cat.color}20;"></div>
+            <div class="relative z-10 flex flex-col h-full justify-between gap-8">
+                <div class="flex items-center justify-between">
+                    <div class="w-12 h-12 rounded-2xl flex items-center justify-center border shadow-[0_0_20px_rgba(124,58,237,0.2)]" style="background: ${cat.color}20; border-color: ${cat.color}50;">
+                        <span class="text-2xl">${cat.icon || '📁'}</span>
+                    </div>
+                    <span class="text-[10px] font-bold px-3 py-1 rounded-full border uppercase tracking-widest" style="color: ${cat.color}; background: ${cat.color}10; border-color: ${cat.color}30;">${statusText}</span>
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold font-headline text-white">${cat.name}</h3>
+                    <div class="flex items-baseline gap-1 mt-1">
+                        <span class="text-2xl font-bold font-headline text-white">$${monthlyTotal.toFixed(0)}</span>
+                        <span class="text-xs text-slate-500">/mo</span>
+                    </div>
+                    <p class="text-xs text-slate-500 mt-1">${catSubs.length} subscription${catSubs.length !== 1 ? 's' : ''}</p>
+                </div>
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between text-[10px] font-bold uppercase tracking-widest">
+                        <span class="text-slate-400">Budget Usage</span>
+                        <span style="color: ${cat.color};">${budgetUsage.toFixed(0)}%</span>
+                    </div>
+                    <div class="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                        <div class="h-full rounded-full shadow-[0_0_10px_rgba(124,58,237,0.5)]" style="width: ${budgetUsage}%; background: ${cat.color};"></div>
+                    </div>
+                </div>
+                <div class="flex gap-2 mt-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button class="flex-1 py-2 rounded-lg bg-surface-container-highest text-xs font-bold hover:bg-white/10 hover:text-white transition-colors btn-edit" data-id="${cat.id}">Edit</button>
+                    <button class="flex-1 py-2 rounded-lg bg-surface-container-highest text-xs font-bold hover:bg-error/20 hover:text-error transition-colors btn-delete" data-id="${cat.id}">Delete</button>
+                </div>
+            </div>
+        </div>
+        `;
+    }).join('');
+    
+    // Trigger card entrance animation stagger
+    setTimeout(() => {
+        document.querySelectorAll('.card-animate').forEach((card, i) => {
+            setTimeout(() => card.classList.add('visible'), i * 100);
+        });
+    }, 50);
+    
+    document.querySelectorAll('.btn-edit').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            editCategory(btn.dataset.id);
+        });
+    });
+    document.querySelectorAll('.btn-delete').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            deleteCategory(btn.dataset.id);
+        });
+    });
+}
+
+function renderSubscriptionList() {
+    const list = document.getElementById('subscription-list');
+    const activeSubs = subscriptions.filter(s => s.active).slice(0, 5);
+    
+    if (activeSubs.length === 0) {
+        list.innerHTML = '<p class="text-slate-500 text-center">No active subscriptions</p>';
+        return;
+    }
+    
+    list.innerHTML = activeSubs.map(sub => {
+        const daysUntil = Math.ceil((new Date(sub.nextRenewalDate) - new Date()) / (1000 * 60 * 60 * 24));
+        const category = sub.category?.name || 'Uncategorized';
+        
+        return `
+        <div class="flex items-center gap-6">
+            <div class="flex-shrink-0 w-16 h-16 rounded-2xl bg-surface-container-high border border-white/5 flex items-center justify-center overflow-hidden">
+                <span class="text-2xl">${sub.category?.icon || '📦'}</span>
+            </div>
+            <div class="flex-grow">
+                <div class="flex justify-between items-center mb-1">
+                    <span class="font-medium text-white">${sub.name}</span>
+                    <span class="text-sm font-bold text-on-surface">${sub.currency} ${parseFloat(sub.amount).toFixed(2)}/mo</span>
+                </div>
+                <div class="text-xs text-slate-500">${category} • Renews in ${daysUntil} days</div>
+            </div>
+        </div>
+        `;
+    }).join('');
+}
+
+document.getElementById('search-input').addEventListener('input', renderCategories);
+
+document.getElementById('btn-add').addEventListener('click', () => {
+    document.getElementById('modal-title').textContent = 'New Category';
+    document.getElementById('form-submit-text').textContent = 'Create Category';
+    document.getElementById('form-id').value = '';
+    document.getElementById('category-form').reset();
+    document.getElementById('form-color').value = '#7c3aed';
+    openModal();
+});
+
+document.getElementById('modal-close').addEventListener('click', closeModal);
+document.getElementById('modal').addEventListener('click', (e) => {
+    if (e.target.id === 'modal') closeModal();
+});
+
+function openModal() {
+    document.getElementById('modal').classList.add('active');
+    document.getElementById('form-error').classList.add('hidden');
+}
+
+function closeModal() {
+    document.getElementById('modal').classList.remove('active');
+}
+
+function editCategory(id) {
+    const cat = categories.find(c => c.id === id);
+    if (!cat) return;
+    
+    document.getElementById('modal-title').textContent = 'Edit Category';
+    document.getElementById('form-submit-text').textContent = 'Update Category';
+    document.getElementById('form-id').value = cat.id;
+    document.getElementById('form-name').value = cat.name;
+    document.getElementById('form-color').value = cat.color || '#7c3aed';
+    document.getElementById('form-icon').value = cat.icon || '';
+    
+    openModal();
+}
+
+async function deleteCategory(id) {
+    if (!confirm('Are you sure you want to delete this category?')) return;
+    
+    try {
+        const response = await apiCall(`${API_BASE}/api/categories/${id}`, {
+            method: 'DELETE'
+        });
+        
+        if (response && response.ok) {
+            loadData();
+        } else {
+            alert('Failed to delete category');
+        }
+    } catch (e) {
+        alert('Error: ' + e.message);
+    }
+}
+
+document.getElementById('category-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const formError = document.getElementById('form-error');
+    const submitBtn = document.getElementById('form-submit');
+    const submitText = document.getElementById('form-submit-text');
+    const spinner = document.getElementById('form-spinner');
+    
+    formError.classList.add('hidden');
+    submitBtn.disabled = true;
+    spinner.classList.remove('hidden');
+    
+    const id = document.getElementById('form-id').value;
+    const isEdit = !!id;
+    
+    const data = {
+        name: document.getElementById('form-name').value.trim(),
+        color: document.getElementById('form-color').value,
+        icon: document.getElementById('form-icon').value.trim() || null
+    };
+    
+    try {
+        const url = isEdit ? `${API_BASE}/api/categories/${id}` : `${API_BASE}/api/categories`;
+        const method = isEdit ? 'PUT' : 'POST';
+        
+        const response = await apiCall(url, {
+            method,
+            body: JSON.stringify(data)
+        });
+        
+        if (response && response.ok) {
+            closeModal();
+            loadData();
+        } else {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to save category');
+        }
+    } catch (e) {
+        formError.textContent = e.message;
+        formError.classList.remove('hidden');
+    } finally {
+        submitBtn.disabled = false;
+        spinner.classList.add('hidden');
+    }
+});
+
+document.getElementById('btn-logout').addEventListener('click', async () => {
+    try {
+        await fetch(`${API_BASE}/api/auth/logout`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ refreshToken })
+        });
+    } catch (e) {
+        console.error('Logout error:', e);
+    }
+    localStorage.removeItem('subtrak_auth');
+    window.location.href = 'index.html';
+});
+</script>
+</body></html>

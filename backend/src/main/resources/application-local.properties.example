@@ -1,0 +1,11 @@
+# Copy this file to application-local.properties and fill in real values
+# DO NOT commit application-local.properties to version control
+
+# Database password
+DB_PASSWORD=your_database_password_here
+
+# JWT secret (generate with: openssl rand -hex 64)
+JWT_SECRET=your_very_long_random_secret_at_least_64_characters_long_for_hs512_algorithm
+
+# Exchange Rate API key (get from https://app.exchangerate-api.com)
+FX_API_KEY=your_exchangerate_api_key_here
