@@ -1,0 +1,52 @@
+databases:
+  - name: subtrak-db
+    databaseName: subtrak
+    user: subtrak_user
+    plan: free
+
+services:
+  # Backend API
+  - type: web
+    name: subtrak-api
+    runtime: java
+    plan: free
+    rootDir: backend
+    buildCommand: mvn clean install -DskipTests
+    startCommand: java -Dserver.port=$PORT -jar target/*.jar
+    healthCheckPath: /api/health
+    envVars:
+      - key: SPRING_DATASOURCE_URL
+        fromDatabase:
+          name: subtrak-db
+          property: connectionString
+      - key: SPRING_DATASOURCE_USERNAME
+        fromDatabase:
+          name: subtrak-db
+          property: user
+      - key: SPRING_DATASOURCE_PASSWORD
+        fromDatabase:
+          name: subtrak-db
+          property: password
+      - key: JWT_SECRET
+        generateValue: true
+      - key: SPRING_JPA_HIBERNATE_DDL_AUTO
+        value: update
+      - key: SPRING_JPA_DATABASE_PLATFORM
+        value: org.hibernate.dialect.PostgreSQLDialect
+
+  # Frontend Static Site
+  - type: web
+    name: subtrak-app
+    runtime: static
+    plan: free
+    rootDir: frontend
+    buildCommand: echo "No build needed"
+    staticPublishPath: .
+    headers:
+      - path: /*
+        name: Cache-Control
+        value: no-cache
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
